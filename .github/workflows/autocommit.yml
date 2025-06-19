@@ -2,26 +2,28 @@ name: Daily Commit
 
 on:
   schedule:
-    - cron: '0 13 * * *'  # Runs every day at 1PM UTC (9AM EST)
+    - cron: '0 13 * * *'  # 1PM UTC
   workflow_dispatch:
 
 jobs:
   commit:
     runs-on: ubuntu-latest
+    env:
+      PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false  # disable default token
 
       - name: Make changes
         run: |
           echo "Last update: $(date)" >> daily.txt
 
       - name: Commit and push changes
-        env:
-          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         run: |
           git config --global user.name 'Muhammed-Abdulbasit'
           git config --global user.email 'muhammedabdulbasit2654@gmail.com'
           git add daily.txt
           git commit -m "🤖 Daily update: $(date)" || echo "No changes to commit"
-          git push https://x-access-token:${PERSONAL_TOKEN}@github.com/Muhammed-Abdulbasit/daily-practice.git HEAD:main
+          git push https://x-access-token:${PERSONAL_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:${GITHUB_REF_NAME}
